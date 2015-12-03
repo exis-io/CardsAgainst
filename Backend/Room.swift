@@ -25,8 +25,9 @@ class Room: RiffleDomain {
     override func onJoin() {
         timer = DelayedCaller(target: self)
         
-        register("pick", pick)
-        register("leave", removePlayer)
+        // The "#details" tells the node we want information about the caller-- their name
+        register("pick#details", pick)
+        register("leave#details", removePlayer)
     }
     
     func removePlayer(domain: String) {
@@ -35,7 +36,7 @@ class Room: RiffleDomain {
             player.demo = true
         } else {
             print("WARN-- asked to remove player \(domain), not found in players!")
-            let a = czar!
+            let _ = czar!
         }
     }
     
@@ -55,13 +56,12 @@ class Room: RiffleDomain {
         
         let newPlayer = Player()
         newPlayer.domain = domain
-        newPlayer.demo = false
         newPlayer.hand = answers.randomElements(4, remove: true)
         
         players.append(newPlayer)
         publish("joined", newPlayer)
         
-        // Add dynamic role
+        // Add dynamic role-- give the player permission to call our endpoints. The role is defined in main.swift
         app.call("xs.demo.Bouncer/assignDynamicRole", self.dynamicRoleId, "player", parent.domain, [domain], handler: nil)
         
         // Add Demo players
@@ -82,10 +82,13 @@ class Room: RiffleDomain {
         return [newPlayer.hand, players, state, self.name!]
     }
     
-    func pick(player: Player, card: String) {
+    func pick(domain: String, card: String) {
         // Player picked a card. This action depends on the current state of play
         
-        let player = players.filter { $0.domain == player.domain }[0]
+        guard let player = getPlayer(players, domain: domain) else {
+            print("Pick from unknown player \(domain)")
+            return
+        }
         
         if state == "Answering" && player.pick == nil && !player.czar {
             player.pick = card
@@ -108,8 +111,8 @@ class Room: RiffleDomain {
         print("    Answering -- ")
         state = "Answering"
         
-        removeZombies()
         setNextCzar()
+        removeZombies()
         publish("answering", czar!, questions.randomElements(1, remove: false)[0], PICK_TIME)
         
         timer.startTimer(PICK_TIME, selector: "startPicking")
@@ -203,10 +206,6 @@ class Room: RiffleDomain {
             
             players.removeObject(player)
             publish("left", player)
-            
-            if player.czar {
-                czar = nil
-            }
             
             // remove the role from the player that left, ensuring they can't call our endpoints anymore
             app.call("xs.demo.Bouncer/revokeDynamicRole", self.dynamicRoleId, "player", parent.domain, [player.domain], handler: nil)

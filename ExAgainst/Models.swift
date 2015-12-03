@@ -19,7 +19,7 @@ class Player: RiffleModel {
     var pick: String?
     
     var czar = false
-    var demo = true
+    var demo = false
     var zombie = false
     
     override class func ignoreProperties() -> [String] {
