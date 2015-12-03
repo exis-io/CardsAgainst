@@ -9,9 +9,13 @@
 import Foundation
 import Riffle
 
+// Do not buffer output-- attempt to capture stdout
+setbuf(__stdoutp, nil);
+print("Container connecting")
+fflush(__stdoutp)
 
 // This is used for testing the container locally.
-let token = "WRnACjVSs.39v7BrteJ7x7vtTmezF7q0tv3kyoA2vdyp4Rt0XF2bYJnWSPS5ejH-NTsCPqVmkBSnEvCb-T9tHEyjwMyzx8.W29bMvzzynK6LykM.mLgovOrMDZolBCWPzGqEAHf3O-WtZ7vbnlRR4ecd5--VOZUOr56zr26ulYA_"
+let token = "9Hh0hq5Mbvha0iB8z---JXjVHP1SMitlYtSPH2uQHfY3G8bl9hBc3htGJbcC1ijI6OM1Dz2wdMwInTH1YI.DpgU1aozD7eicDyWVtvMkeVh0r3PwP6EvCS5dMaXy1JlfdHwBs4SrvE3gBGW481l0YOT.jbgyecpsvkanRtyRy3g_"
 
 // How long each round takes, in seconds
 let ANSWER_TIME = 10.0
@@ -41,7 +45,9 @@ class Container: RiffleDomain {
             ["target": self.domain + "/$/leave", "verb":"c"],
             ["target": self.domain + "/$/answering", "verb":"s"],
             ["target": self.domain + "/$/picking", "verb":"s"],
-            ["target": self.domain + "/$/scoring", "verb":"s"]
+            ["target": self.domain + "/$/scoring", "verb":"s"],
+            ["target": self.domain + "/$/left", "verb":"s"],
+            ["target": self.domain + "/$/joined", "verb":"s"]
         ]
         
         app.call("xs.demo.Bouncer/addDynamicRole", "player", self.domain, permissions, handler: nil)
@@ -73,17 +79,15 @@ class Container: RiffleDomain {
     }
     
     func closeRoom(room: Room) {
-        print("Closing room.")
+        //print("Closing room.")
         //rooms.removeObject(room)
     }
     
     func playerLeft(domain: String) {
         for room in rooms {
-            for player in room.players {
-                if player.domain == domain {
-                    room.removePlayer(domain)
-                    return
-                }
+            if let _ = getPlayer(room.players, domain: domain) {
+                room.removePlayer(domain)
+                return
             }
         }
     }

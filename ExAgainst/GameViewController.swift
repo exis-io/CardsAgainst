@@ -55,8 +55,10 @@ class GameViewController: UIViewController {
     }
     
     override func viewWillDisappear(animated: Bool) {
-        room.call("leave", currentPlayer.domain, handler: nil)
+        // Let the room know we're leaving the game
+        room.call("leave", handler: nil)
         
+        // Calling leave on a domain removes all subscription and registrations
         room.leave()
         me.leave()
     }
@@ -125,7 +127,7 @@ class GameViewController: UIViewController {
             tableDelegate.removeCellsExcept([card])
         }
         
-        room.call("pick", currentPlayer, card, handler: nil)
+        room.call("pick", card, handler: nil)
     }
     
     func draw(cards: [String]) {

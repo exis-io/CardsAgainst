@@ -25,48 +25,43 @@ class Room: RiffleDomain {
     override func onJoin() {
         timer = DelayedCaller(target: self)
         
-        register("pick", pick)
-        register("leave", removePlayer)
+        // The "#details" tells the node we want information about the caller-- their name
+        register("pick#details", pick)
+        register("leave#details", removePlayer)
     }
     
     func removePlayer(domain: String) {
-        let player = players.filter { $0.domain == domain }[0]
-        print("Removing player: \(player.domain)")
-        answers.appendContentsOf(player.hand)
-        
-        if let p = player.pick {
-            answers.append(p)
+        if let player = getPlayer(players, domain: domain) {
+            player.zombie = true
+            player.demo = true
+        } else {
+            print("WARN-- asked to remove player \(domain), not found in players!")
+            let _ = czar!
         }
-        
-        players.removeObject(player)
-        publish("left", player)
-        
-        // What happens if the current player is a czar?
-        // Either zombie or reset play
-        
-        // remove the role from the player that left, ensuring they can't call our endpoints anymore
-        app.call("xs.demo.Bouncer/revokeDynamicRole", self.dynamicRoleId, "player", parent.domain, [player.domain], handler: nil)
-        
-        // Close the room if there are only demo players left
-//        if players.reduce(0, combine: { $0 + ($1.demo ? 0 : 1) }) == 0 {
-//            parent.closeRoom(self)
-//            parent = nil
-//            timer.cancel()
-//        }
     }
     
     func addPlayer(domain: String) -> AnyObject {
         // Add the new player and draw them a hand. Let everyone else in the room know theres a new player
         print("Adding Player \(domain)")
         
+        // When the player leaves they're marked as a zombie. All zombies are cleared out at the end of a round, 
+        // but if a player leaves and then rejoins before their zombie was cleared out then we'll have two players with the same name
+        // If the player's name already exists in the app, unzombiefy them instead of creating a new player
+        if let existingPlayer = getPlayer(players, domain: domain) {
+            existingPlayer.zombie = false
+            existingPlayer.demo = false
+            
+            return [existingPlayer.hand, players, state, self.name!]
+        }
+        
         let newPlayer = Player()
         newPlayer.domain = domain
-        newPlayer.demo = false
         newPlayer.hand = answers.randomElements(4, remove: true)
         
         players.append(newPlayer)
+        publish("joined", newPlayer)
         
-        // Add dynamic role
+        // Add dynamic role-- give the player permission to call our endpoints. The role is defined in main.swift
         app.call("xs.demo.Bouncer/assignDynamicRole", self.dynamicRoleId, "player", parent.domain, [domain], handler: nil)
         
         // Add Demo players
@@ -80,15 +75,20 @@ class Room: RiffleDomain {
             }
         }
         
-        timer.startTimer(EMPTY_TIME, selector: "startAnswering")
+        if state == "Empty" {
+            timer.startTimer(EMPTY_TIME, selector: "startAnswering")
+        }
         
         return [newPlayer.hand, players, state, self.name!]
     }
     
-    func pick(player: Player, card: String) {
+    func pick(domain: String, card: String) {
         // Player picked a card. This action depends on the current state of play
         
-        let player = players.filter { $0.domain == player.domain }[0]
+        guard let player = getPlayer(players, domain: domain) else {
+            print("Pick from unknown player \(domain)")
+            return
+        }
         
         if state == "Answering" && player.pick == nil && !player.czar {
             player.pick = card
@@ -105,12 +105,16 @@ class Room: RiffleDomain {
         }
     }
     
+    
+    // MARK: Round Transitions
     func startAnswering() {
         print("    Answering -- ")
         state = "Answering"
         
         setNextCzar()
+        removeZombies()
         publish("answering", czar!, questions.randomElements(1, remove: false)[0], PICK_TIME)
+        
         timer.startTimer(PICK_TIME, selector: "startPicking")
     }
     
@@ -169,18 +173,49 @@ class Room: RiffleDomain {
         timer.startTimer(SCORE_TIME, selector: "startAnswering")
     }
     
+    
+    // MARK: Utils
     func setNextCzar() {
         if czar == nil {
             czar = players[0]
             czar!.czar = true
         } else {
             let i = players.indexOf(czar!)!
-            let newCzar = players[(i + 1) % (players.count - 1)]
+            let newCzar = players[(i + 1) % (players.count)]
             czar!.czar = false
             newCzar.czar = true
             czar = newCzar
         }
         
         print("New Czar: \(czar!.domain)")
+    }
+    
+    func removeZombies() {
+        // Players that left in the middle of a round of play are only removed once, at the start of a new round
+        // in order to avoid round restarts or interrupted play
+        
+        for player in players {
+            if !player.zombie { continue }
+            
+            print("Removing player: \(player.domain)")
+            answers.appendContentsOf(player.hand)
+            
+            if let p = player.pick {
+                answers.append(p)
+            }
+            
+            players.removeObject(player)
+            publish("left", player)
+            
+            // remove the role from the player that left, ensuring they can't call our endpoints anymore
+            app.call("xs.demo.Bouncer/revokeDynamicRole", self.dynamicRoleId, "player", parent.domain, [player.domain], handler: nil)
+            
+            // Close the room if there are only demo players left-- this is deferred until promises get in
+            if players.reduce(0, combine: { $0 + ($1.demo ? 0 : 1) }) == 0 {
+                parent.closeRoom(self)
+                parent = nil
+                timer.cancel()
+            }
+        }
     }
 }

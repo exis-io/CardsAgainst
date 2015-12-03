@@ -25,8 +25,7 @@ public class RiffleDomain: NSObject, RiffleDelegate {
         // Initialize this agent as the Application domain, or the root domain
         // for this instance of the application
         
-//        domain = env("DOMAIN", d)
-        domain = d
+        domain = env("DOMAIN", d)
         connection = RiffleConnection()
         name = domain
         
@@ -95,13 +94,13 @@ public class RiffleDomain: NSObject, RiffleDelegate {
                 Riffle.panic(" Unknown exception!")
             }
             
-            })
-            { (err: NSError!) -> Void in
-                if let e = err {
-                    print("An error occured: ", e)
-                } else {
-                    self.subscriptions.append(endpoint)
-                }
+        })
+        { (err: NSError!) -> Void in
+            if let e = err {
+                print("Error subscribing to endpoint \(endpoint): ", e.localizedDescription)
+            } else {
+                self.subscriptions.append(endpoint)
+            }
         }
     }
     
@@ -191,7 +190,6 @@ public class RiffleDomain: NSObject, RiffleDelegate {
         connection.session!.call(endpoint, payload: serialized) { (result: MDWampResult!, err: NSError!) -> Void in
             if err != nil {
                 Riffle.warn("Call Error for endpoint \(endpoint): [\(err.localizedDescription)]")
-                //print(err)
             }
             else {
                 if let h = fn {
