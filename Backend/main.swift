@@ -9,7 +9,7 @@
 import Foundation
 import Riffle
 
-let app = RiffleDomain(domain: "xs.demo.exis.cardsagainst")
+let app = RiffleDomain(domain: "xs.demo.USERNAME.cardsagainst")
 
 // How long each round takes, in seconds
 let ANSWER_TIME = 10.0

@@ -44,15 +44,6 @@ class Room: RiffleDomain {
         // Add the new player and draw them a hand. Let everyone else in the room know theres a new player
         print("Adding Player \(domain)")
         
-        // When the player leaves they're marked as a zombie. All zombies are cleared out at the end of a round, 
-        // but if a player leaves and then rejoins before their zombie was cleared out then we'll have two players with the same name
-        // If the player's name already exists in the app, unzombiefy them instead of creating a new player
-        if let existingPlayer = getPlayer(players, domain: domain) {
-            existingPlayer.zombie = false
-            existingPlayer.demo = false
-            return [existingPlayer.hand, players, state, self.name!]
-        }
-        
         let newPlayer = Player()
         newPlayer.domain = domain
         newPlayer.demo = false
@@ -161,24 +152,6 @@ class Room: RiffleDomain {
     
     // MARK: Player Utils
     func roomMaintenance() {
-        // Players that left in the middle of a round of play are only removed once, at the start of a new round
-        // in order to avoid round restarts or interrupted play
-        for player in players.filter({ $0.zombie }) {
-            print("Removing zombies: \(player.domain)")
-            answers.appendContentsOf(player.hand)
-            
-            if let p = player.pick {
-                answers.append(p)
-            }
-            
-            players.removeObject(player)
-            publish("left", player)
-            czar = player.czar ? nil : czar
-            
-            // remove the role from the player that left, ensuring they can't call our endpoints anymore
-            app.call("xs.demo.Bouncer/revokeDynamicRole", self.dynamicRoleId, "player", container.domain, [player.domain], handler: nil)
-        }
-        
         // If there aren't enough players to play a full
         while players.count < 3 {
             let player = Player()
