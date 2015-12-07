@@ -26,17 +26,6 @@ class Container: RiffleDomain {
         print("Container joined as \(domain)")
         app.subscribe("sessionLeft", playerLeft)
         register("play#details", play)
-        
-        // Create a dynamic role to give to players later
-        app.call("xs.demo.Bouncer/addDynamicRole", "player", self.domain, [
-            ["target": "\(domain)/$/pick", "verb":"c"],
-            ["target": "\(domain)/$/leave", "verb":"c"],
-            ["target": "\(domain)/$/answering", "verb":"s"],
-            ["target": "\(domain)/$/picking", "verb":"s"],
-            ["target": "\(domain)/$/scoring", "verb":"s"],
-            ["target": "\(domain)/$/left", "verb":"s"],
-            ["target": "\(domain)/$/joined", "verb":"s"]
-        ], handler: nil)
     }
     
     

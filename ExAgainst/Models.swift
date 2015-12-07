@@ -4,9 +4,12 @@
 //
 //  Created by Damouse on 10/1/15.
 //  Copyright © 2015 paradrop. All rights reserved.
-
-// This code is shared across the app and the container.
-// Contains the user model, collection manipulation, and some useful funcitons
+//
+//  This code is shared across the app and the container.
+//  Contains the user model, collection manipulation, and some useful funcitons
+//
+//  Even though its "Models.swift", most of this is utilities
+//
 
 import Foundation
 import Riffle

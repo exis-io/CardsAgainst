@@ -78,76 +78,7 @@ class Room: RiffleDomain {
     }
     
     
-    // MARK: Round Transitions
-    func startAnswering() {
-        // Close the room if there are only demo players left
-        if players.reduce(0, combine: { $0 + ($1.demo ? 0 : 1) }) == 0 {
-            container.rooms.removeObject(self)
-            players = []
-            timer.cancel()
-            return
-        }
-        
-        print("    Answering -- ")
-        state = "Answering"
-        roomMaintenance()
 
-        publish("answering", czar!, questions.randomElements(1, remove: false)[0], PICK_TIME)
-        timer.startTimer(PICK_TIME, selector: "startPicking")
-    }
-    
-    func startPicking() {
-        print("    Picking -- ")
-        state = "Picking"
-        let pickers = players.filter { !$0.czar }
-        
-        // Autopick for players that didnt pick
-        for player in pickers {
-            if player.pick == nil {
-                player.pick = player.hand.randomElements(1, remove: true)[0]
-            }
-        }
-        
-        publish("picking", pickers.map({ $0.pick! }), PICK_TIME)
-        timer.startTimer(PICK_TIME, selector: "startScoring:")
-    }
-    
-    func startScoring(t: NSTimer) {
-        print("    Scoring -- ")
-        state = "Scoring"
-        
-        // Choose a winner at random if the czar didn't choose one
-        var pickers = players.filter { !$0.czar }
-        var winner = pickers.randomElements(1, remove: false)[0]
-        
-        if let domain = t.userInfo as? String {
-            if let p = getPlayer(players, domain: domain) {
-                winner = p
-            }
-        }
-        
-        winner.score += 1
-        publish("scoring", winner, winner.pick!, SCORE_TIME)
-        
-        // draw cards for all players, nil their picks
-        for p in pickers {
-            if let c = p.pick {
-                answers.append(c)
-                p.hand.removeObject(c)
-            }
-            
-            let newAnswer = answers.randomElements(1, remove: true)
-            p.hand += newAnswer
-            p.pick = nil
-            
-            // If this isn't a demo player deal them a new card
-            if !p.demo {
-                call(p.domain + "/draw", newAnswer, handler: nil)
-            }
-        }
-        
-        timer.startTimer(SCORE_TIME, selector: "startAnswering")
-    }
     
     
     // MARK: Player Utils

@@ -59,7 +59,7 @@ class LandingViewController: UIViewController, RiffleDelegate {
         controller.room = RiffleDomain(name: room, superdomain: container)
         
         // Gives the dealer permission to call "/draw" on us as needed
-        self.app.call("xs.demo.Bouncer/setPerm", self.container.domain, self.me.domain + "/draw", handler: nil)
+        
         presentControllerTranslucent(self, target: controller)
     }
     
