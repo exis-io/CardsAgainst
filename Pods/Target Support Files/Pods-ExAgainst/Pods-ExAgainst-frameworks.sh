@@ -16,7 +16,7 @@ install_framework()
     local source="$1"
   fi
 
-  local destination="${CONFIGURATION_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}"
+  local destination="${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}"
 
   if [ -L "${source}" ]; then
       echo "Symlinked..."
@@ -84,28 +84,18 @@ strip_invalid_archs() {
 
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
-  install_framework "Pods-ExAgainst/AFNetworking.framework"
-  install_framework "Pods-ExAgainst/CocoaAsyncSocket.framework"
-  install_framework "Pods-ExAgainst/GHODictionary.framework"
-  install_framework "Pods-ExAgainst/IHKeyboardAvoiding.framework"
-  install_framework "Pods-ExAgainst/LTMorphingLabel.framework"
-  install_framework "Pods-ExAgainst/M13ProgressSuite.framework"
-  install_framework "Pods-ExAgainst/MPMessagePack.framework"
-  install_framework "Pods-ExAgainst/RMSwipeTableViewCell.framework"
-  install_framework "Pods-ExAgainst/Riffle.framework"
-  install_framework "Pods-ExAgainst/SocketRocket.framework"
-  install_framework "Pods-ExAgainst/Spring.framework"
+  install_framework "$BUILT_PRODUCTS_DIR/IHKeyboardAvoiding/IHKeyboardAvoiding.framework"
+  install_framework "$BUILT_PRODUCTS_DIR/LTMorphingLabel/LTMorphingLabel.framework"
+  install_framework "$BUILT_PRODUCTS_DIR/M13ProgressSuite/M13ProgressSuite.framework"
+  install_framework "$BUILT_PRODUCTS_DIR/RMSwipeTableViewCell/RMSwipeTableViewCell.framework"
+  install_framework "$BUILT_PRODUCTS_DIR/Riffle-iOS/Riffle.framework"
+  install_framework "$BUILT_PRODUCTS_DIR/Spring/Spring.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
-  install_framework "Pods-ExAgainst/AFNetworking.framework"
-  install_framework "Pods-ExAgainst/CocoaAsyncSocket.framework"
-  install_framework "Pods-ExAgainst/GHODictionary.framework"
-  install_framework "Pods-ExAgainst/IHKeyboardAvoiding.framework"
-  install_framework "Pods-ExAgainst/LTMorphingLabel.framework"
-  install_framework "Pods-ExAgainst/M13ProgressSuite.framework"
-  install_framework "Pods-ExAgainst/MPMessagePack.framework"
-  install_framework "Pods-ExAgainst/RMSwipeTableViewCell.framework"
-  install_framework "Pods-ExAgainst/Riffle.framework"
-  install_framework "Pods-ExAgainst/SocketRocket.framework"
-  install_framework "Pods-ExAgainst/Spring.framework"
+  install_framework "$BUILT_PRODUCTS_DIR/IHKeyboardAvoiding/IHKeyboardAvoiding.framework"
+  install_framework "$BUILT_PRODUCTS_DIR/LTMorphingLabel/LTMorphingLabel.framework"
+  install_framework "$BUILT_PRODUCTS_DIR/M13ProgressSuite/M13ProgressSuite.framework"
+  install_framework "$BUILT_PRODUCTS_DIR/RMSwipeTableViewCell/RMSwipeTableViewCell.framework"
+  install_framework "$BUILT_PRODUCTS_DIR/Riffle-iOS/Riffle.framework"
+  install_framework "$BUILT_PRODUCTS_DIR/Spring/Spring.framework"
 fi

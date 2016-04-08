@@ -33,15 +33,6 @@ typedef NS_ENUM(NSUInteger, RMSwipeTableViewCellAnimationType) {
  
  */
 
-/*
- When set, interrupts the pan gesture handler until the finger leaves the screen. Once
- the gesture officially ends, this flag is reset to false.
- 
- Useful for triggering a forced stop of gesture recognition, for thresholding, for example.
- */
-@property bool interruptPanGestureHandler;
-
-
 @property (nonatomic, strong) UIView *backView;
 
 /**
@@ -57,9 +48,6 @@ typedef NS_ENUM(NSUInteger, RMSwipeTableViewCellAnimationType) {
  Default is RMSwipeTableViewCellAnimationTypeBounce.
  */
 @property (nonatomic, readwrite) RMSwipeTableViewCellAnimationType animationType;
-
-
-@property (strong, nonatomic) UIGestureRecognizer * panner;
 
 /**
  Determines the animation duration when the cell's contentView animates back. 

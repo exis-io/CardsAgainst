@@ -13,7 +13,7 @@ var baseQuestions = loadCards("q13")
 var baseAnswers = loadCards("a13")
 
 
-class Room: RiffleDomain {
+class Room: Domain {
     var timer: DelayedCaller!
     var dynamicRoleId: String!
     var state: String = "Empty"

@@ -1,0 +1,1 @@
+../../../../Riffle/Pod/Assets/osx/Mantle.framework/Headers/Mantle.h

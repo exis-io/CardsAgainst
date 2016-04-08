@@ -1,9 +1,8 @@
 use_frameworks!
 
-target :ExAgainst, :exclusive => true do
+target 'ExAgainst' do
     platform :ios, '9.0'
-    pod 'Riffle'
-    #pod 'Riffle', :path => '../../ios/swiftRiffle'
+    pod 'Riffle', :git => 'https://github.com/exis-io/swiftRiffleCocoapod'
     pod 'Spring', :git => 'https://github.com/MengTo/Spring.git', :branch => 'swift2'
     pod 'IHKeyboardAvoiding'
     pod 'RMSwipeTableViewCell'
@@ -11,8 +10,7 @@ target :ExAgainst, :exclusive => true do
     pod 'LTMorphingLabel', '~> 0.0.9'
 end
 
-target :Backend, :exclusive => true do
-    platform :osx, '10.10'
-    pod 'Riffle'
-    #pod 'Riffle', :path => '../../ios/swiftRiffle'
+target 'Backend' do
+    platform :osx, '10.11'
+    pod 'Riffle', :git => 'https://github.com/exis-io/swiftRiffleCocoapod'
 end
